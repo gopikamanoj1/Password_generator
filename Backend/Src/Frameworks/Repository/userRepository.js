@@ -1,5 +1,7 @@
-import { User } from '../database/index.js';
-import { GeneratedPassword } from '../database/index.js';
+// userRepository.js
+
+import { User } from '../Database/index.js';
+import { GeneratedPassword } from '../Database/index.js';
 export default {
 
 

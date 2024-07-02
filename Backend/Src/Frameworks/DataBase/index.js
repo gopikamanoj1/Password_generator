@@ -1,3 +1,6 @@
+//  databse/index.js
+
+
 import {User} from "../DataBase/Schema/index.js"
 import { GeneratedPassword } from "../DataBase/Schema/index.js"
 
