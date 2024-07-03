@@ -94,9 +94,7 @@ const Login = () => {
                 />
                 {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
               </div>
-              <div className="flex items-center justify-between">
-                <Link to="/forgot-password" className="text-sm font-medium text-primary-600 hover:underline dark:text-slate-400">Forgot password?</Link>
-              </div>
+            
               <button type="submit" className="w-full text-white bg-cyan-900 focus:ring-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
                 Sign in
               </button>
