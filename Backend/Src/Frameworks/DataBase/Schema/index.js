@@ -1,6 +1,9 @@
 import { User } from "./UserSchema.js"
 import { GeneratedPassword } from "./generatedPasswordSchema.js"
-export {
+
+const DatabaseSchema={
     User,
     GeneratedPassword
 }
+
+export  default DatabaseSchema

@@ -1,14 +1,15 @@
 // userRepository.js
 
-import { User } from '../Database/index.js';
-import { GeneratedPassword } from '../Database/index.js';
+// import { User } from '../Database/index.js';
+// import { GeneratedPassword } from '../Database/index.js';
+import {DatabaseSchema} from '../Database/index.js';
 export default {
 
 
   findUserByEmail: async (email) => {
     console.log(email, "jiji");
     try {
-      const user = await User.findOne({ email });
+      const user = await DatabaseSchema.User.findOne({ email });
       return user;
     } catch (error) {
       console.error("Error in findUserByEmail:", error);
@@ -20,7 +21,7 @@ export default {
     try {
       const { name, email, password } = data;
 
-      const user = new User({
+      const user = new DatabaseSchema.User({
         name,
         email,
         password,
@@ -36,7 +37,7 @@ export default {
   },
   loginUser:async (email)=>{
     try {
-      const findUser = await User.findOne({ email });
+      const findUser = await DatabaseSchema.User.findOne({ email });
       console.log(findUser, "finding user");
       if (findUser) {
         return { status: true, data: { hashedPassword: findUser.password },findUser };
@@ -52,7 +53,7 @@ export default {
   savePassword:async(data)=>{
     try {
       const {password,email}=data
-      const generatedPassword = new GeneratedPassword({
+      const generatedPassword = new DatabaseSchema.GeneratedPassword({
         password,
         email,
       });
@@ -73,7 +74,7 @@ export default {
   getPassword: async (data)=>{
     try {
       const {email}= data
-      const passowrds = await GeneratedPassword.find({ email });
+      const passowrds = await DatabaseSchema.GeneratedPassword.find({ email });
       if (passowrds){
         return { status: true, data: passowrds}
 
@@ -92,7 +93,7 @@ export default {
   editPassword: async (data)=>{
     try {
       const {email,password,_id}=data
-      const existingPassword=await GeneratedPassword.findById(_id)
+      const existingPassword=await DatabaseSchema.GeneratedPassword.findById(_id)
       if (existingPassword){
         existingPassword.password = password; // Update the password
         await existingPassword.save(); // Save the updated password
@@ -111,14 +112,14 @@ export default {
     try {
       const { passwordId }=data
       // Check if the password exists in the database
-      const findPassword = await GeneratedPassword.findById(passwordId);
+      const findPassword = await DatabaseSchema.GeneratedPassword.findById(passwordId);
     
       if (!findPassword) {
         return { status: false, data: "Password not found" };
       }
   
       // Delete the password
-      const deletedPassword = await GeneratedPassword.findByIdAndDelete(passwordId);
+      const deletedPassword = await DatabaseSchema.GeneratedPassword.findByIdAndDelete(passwordId);
       
       if (!deletedPassword) {
         return { status: false, data: "Failed to delete password" };
