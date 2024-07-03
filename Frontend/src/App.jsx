@@ -7,7 +7,6 @@ import 'react-toastify/dist/ReactToastify.css';
 import PasswordGeneratorPage from './Pages/PasswordGeneratorPage';
 import PrivateRoute from './Public_Private_Routes/PrivateRoute';
 import PublicRoute from './Public_Private_Routes/PublicRoute';
-import ShowSavedPasswordsPage from './Pages/ShowSavedPasswordsPage';
 
 
 const App = () => {
@@ -19,7 +18,6 @@ const App = () => {
         <Route path="/" element={<PrivateRoute> <PasswordGeneratorPage /> </PrivateRoute>} />
         <Route path="/login" element={<PublicRoute> <LoginPage /> </PublicRoute>} />
         <Route path="/register" element={<PublicRoute> <RegisterPage /> </PublicRoute>} />
-        {/* <Route path="/savedPassword" element={<PrivateRoute> <ShowSavedPasswordsPage /> </PrivateRoute>} />/ */}
 
       </Routes>
     </div>

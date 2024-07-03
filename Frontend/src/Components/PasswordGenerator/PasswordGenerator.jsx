@@ -1,9 +1,8 @@
 
 
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
-import { FaCopy } from 'react-icons/fa'; // Importing the copy icon from react-icons
+import { FaCopy, FaSync } from 'react-icons/fa'; // Importing the copy and refresh icons from react-icons
 import 'react-toastify/dist/ReactToastify.css';
 import axiosInstance from '../../config/axiosConfig';
 
@@ -84,30 +83,33 @@ const PasswordGenerator = () => {
         return 'Poor';
     }
   };
-  const savePassword= async(password)=>{
 
+  const savePassword = async (password) => {
     const email = localStorage.getItem('email');
     console.log(email); 
-   try {
-    const data={
-      password:password,
-      email:email
+    try {
+      const data = {
+        password: password,
+        email: email
+      };
+      console.log(data, "dataaaaa");
+      const response = await axiosInstance.post('/api/auth/savePassword', data);
+      console.log(response, "response in password generator");
+      if (response.data) {
+        toast.success("Password saved successfully");
+        setPassword('');
+      } else {
+        toast.error('Password saving failed');
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Something went wrong");
+    }
+  };
 
-    }
-    console.log(data,"dataaaaa");
-    const response= await axiosInstance.post('/api/auth/savePassword',data)
-    console.log(response,"response in password generator ");
-    if (response.data){
-        toast.success("Password saved success")
-        setPassword('')
-    }else{
-      toast.error('Paasword saving failed')
-    }
-   } catch (error) {
-    console.log(error)
-    toast.error("Something went wrong")
-   }
-  }
+  useEffect(() => {
+    generatePassword();
+  }, [length, includeUppercase, includeLowercase, includeNumbers, includeSymbols]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -126,6 +128,10 @@ const PasswordGenerator = () => {
           <FaCopy
             onClick={copyToClipboard}
             className="absolute right-2 top-2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
+          />
+          <FaSync
+            onClick={generatePassword}
+            className="absolute right-8 top-2 cursor-pointer text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
           />
           <div className="text-center text-sm text-gray-500 dark:text-gray-400">
             Strength: <span className="font-bold">{calculateStrength()}</span>
@@ -196,14 +202,8 @@ const PasswordGenerator = () => {
           </div>
         </div>
         <div className="flex justify-between">
-          <button
-            onClick={generatePassword}
-            className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700"
-          >
-            Generate Password
-          </button>
           <button 
-          onClick={() => savePassword(password)}
+            onClick={() => savePassword(password)}
             className="px-4 py-2 text-white bg-green-600 rounded hover:bg-green-700"
           >
             Save Password
@@ -215,3 +215,4 @@ const PasswordGenerator = () => {
 };
 
 export default PasswordGenerator;
+

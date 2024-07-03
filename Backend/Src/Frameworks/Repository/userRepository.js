@@ -88,6 +88,49 @@ export default {
 
 
     }
+  },
+  editPassword: async (data)=>{
+    try {
+      const {email,password,_id}=data
+      const existingPassword=await GeneratedPassword.findById(_id)
+      if (existingPassword){
+        existingPassword.password = password; // Update the password
+        await existingPassword.save(); // Save the updated password
+
+        return { status: true, data: "Password updated successfully" };
+      } else {
+        return { status: false, data: "Password not found" };
+      }
+      
+    } catch (error) {
+      console.log(error);
+      return { status: false , data : "something went wrong "}
+    }
+  },
+  deletePassword:async (data)=>{
+    try {
+      const { passwordId }=data
+      // Check if the password exists in the database
+      const findPassword = await GeneratedPassword.findById(passwordId);
+    
+      if (!findPassword) {
+        return { status: false, data: "Password not found" };
+      }
+  
+      // Delete the password
+      const deletedPassword = await GeneratedPassword.findByIdAndDelete(passwordId);
+      
+      if (!deletedPassword) {
+        return { status: false, data: "Failed to delete password" };
+      }
+  
+      console.log(`Deleted password: ${deletedPassword}`); // Log the deleted password for debugging
+      return { status: true, data: "Password deleted successfully" };
+      
+    } catch (error) {
+      console.log(error);
+      return { status: false, data : " something went wrong "}
+    }
   }
 
 

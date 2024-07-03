@@ -10,38 +10,76 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
+  const [nameError, setNameError] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  const [confirmPasswordError, setConfirmPasswordError] = useState('');
   const navigate = useNavigate(); 
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
-const handleRegister = async (e) => {
-  e.preventDefault();
+  const handleRegister = async (e) => {
+    e.preventDefault();
 
-  if (password !== confirmPassword) {
-    toast.error('Passwords do not match');
-    return;
-  }
+    let isValid = true;
 
-  try {
-    const data = { name, email, password };
-    const response = await axiosInstance.post('/api/auth/register', data);
-    
-    if (response.data.status) {
-      const { token, data: responseData } = response.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('data', JSON.stringify(responseData)); 
-      localStorage.setItem('email', responseData.email); 
-  
-      toast.success('Registration successful');
-      navigate('/login'); // Redirect to login page  
-    } else {
-      toast.error(response.data.data); // Show appropriate error message
+    if (!name) {
+      setNameError('Name is required');
+      setTimeout(() => setNameError(''), 5000);
+      isValid = false;
     }
-  } catch (error) {
-    console.error('Error registering user:', error);
-    toast.error(error.response?.data?.data || 'Registration failed');
-  }
-};
 
+    if (!email) {
+      setEmailError('Email is required');
+      setTimeout(() => setEmailError(''), 5000);
+      isValid = false;
+    } else if (!validateEmail(email)) {
+      setEmailError('Invalid email format');
+      setTimeout(() => setEmailError(''), 5000);
+      isValid = false;
+    }
+
+    if (!password) {
+      setPasswordError('Password is required');
+      setTimeout(() => setPasswordError(''), 5000);
+      isValid = false;
+    }
+
+    if (!confirmPassword) {
+      setConfirmPasswordError('Confirm password is required');
+      setTimeout(() => setConfirmPasswordError(''), 5000);
+      isValid = false;
+    } else if (password !== confirmPassword) {
+      setConfirmPasswordError('Passwords do not match');
+      setTimeout(() => setConfirmPasswordError(''), 5000);
+      isValid = false;
+    }
+
+    if (!isValid) return;
+
+    try {
+      const data = { name, email, password };
+      const response = await axiosInstance.post('/api/auth/register', data);
+      
+      if (response.data.status) {
+        const { token, data: responseData } = response.data;
+        localStorage.setItem('token', token);
+        localStorage.setItem('data', JSON.stringify(responseData)); 
+        localStorage.setItem('email', responseData.data.email); 
+
+        toast.success('Registration successful');
+        navigate('/login'); // Redirect to login page  
+      } else {
+        toast.error(response.data.data); // Show appropriate error message
+      }
+    } catch (error) {
+      console.error('Error registering user:', error);
+      toast.error(error.response?.data?.data || 'Registration failed');
+    }
+  };
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900">
@@ -62,8 +100,9 @@ const handleRegister = async (e) => {
                   placeholder="Enter your name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  required
+                  
                 />
+                {nameError && <p className="text-red-500 text-sm">{nameError}</p>}
               </div>
               <div>
                 <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Your email</label>
@@ -75,8 +114,9 @@ const handleRegister = async (e) => {
                   placeholder="name@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  required
+                  
                 />
+                {emailError && <p className="text-red-500 text-sm">{emailError}</p>}
               </div>
               <div>
                 <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Password</label>
@@ -88,8 +128,9 @@ const handleRegister = async (e) => {
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  required
+                  
                 />
+                {passwordError && <p className="text-red-500 text-sm">{passwordError}</p>}
               </div>
               <div>
                 <label htmlFor="confirm-password" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Confirm password</label>
@@ -101,8 +142,9 @@ const handleRegister = async (e) => {
                   className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
+                  
                 />
+                {confirmPasswordError && <p className="text-red-500 text-sm">{confirmPasswordError}</p>}
               </div>
               <button type="submit" className="w-full text-white bg-primary-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">Create an account</button>
             </form>
@@ -117,5 +159,4 @@ const handleRegister = async (e) => {
 };
 
 export default Register;
-
 

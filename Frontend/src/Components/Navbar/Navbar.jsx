@@ -1,15 +1,25 @@
 
+
+
+
+
+
+
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaCopy } from 'react-icons/fa';
+import { FaCopy, FaTrash, FaEdit } from 'react-icons/fa';
 import axiosInstance from '../../config/axiosConfig';
+import DeleteAlert from './DeleteAlert';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false); // State for showing saved passwords modal
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // State for showing edit password modal
   const [passwords, setPasswords] = useState([]);
+  const [editingPassword, setEditingPassword] = useState(null);
+  
   const navigate = useNavigate();
 
   const toggleNavbar = () => {
@@ -32,8 +42,8 @@ const Navbar = () => {
       const data = { email: email };
       const response = await axiosInstance.post('/api/auth/getPasswords', data);
       console.log(response, "saved passwords ");
-      setPasswords(response.data.data); // Accessing the data property
-      setIsModalOpen(true); // Open the modal
+      setPasswords(response.data.data);
+      setIsModalOpen(true);
     } catch (error) {
       console.log(error);
       toast.error("Something went wrong");
@@ -47,6 +57,67 @@ const Navbar = () => {
 
   const closeModal = () => {
     setIsModalOpen(false);
+  };
+
+  const handleDelete = async (passwordId) => {
+    if (window.confirm("Are you sure you want to delete this password?")) {
+
+      try {
+    
+        const data={
+          passwordId:passwordId
+        }
+        console.log(data,"ffffffffffffffffffffff");
+        const response = await axiosInstance.post('/api/auth/deletePassword',data);
+        console.log(response, "deleted password");
+        // setPasswords(passwords.filter(password => password._id !== passwordId));
+        showSavedPasswords()
+        toast.success("Password deleted successfully");
+      } catch (error) {
+        console.log(error);
+        toast.error("Failed to delete password");
+      }
+    }
+  };
+
+  const handleEdit = (passwordId) => {
+    const passwordToEdit = passwords.find((password) => password._id === passwordId);
+    console.log(passwordId,"ooo")
+    setEditingPassword(passwordToEdit);
+    console.log(passwordToEdit.password,"ppp");
+    
+    setIsEditModalOpen(true); // Open the edit modal
+        
+
+
+  };
+
+  const closeEditModal = () => {
+    setEditingPassword(null);
+    setIsEditModalOpen(false); // Close the edit modal
+  };
+
+  const saveEditedPassword = async (editedPassword) => {
+    try {
+      const {email, password, _id}=editedPassword
+     const data={
+      email:email,
+      password:password,
+      _id:_id
+      }
+      console.log(data,"odataaa");
+      const response = await axiosInstance.put('/api/auth/editPasswords', data);
+      if (response.data) {
+        toast.success('Password updated successfully');
+        showSavedPasswords()
+        closeEditModal();
+      } else {
+        toast.error('Failed to update password');
+      }
+    } catch (error) {
+      console.error('Error updating password:', error);
+      toast.error('Failed to update password');
+    }
   };
 
   return (
@@ -112,24 +183,87 @@ const Navbar = () => {
                 </button>
               </div>
               <div className="p-4 md:p-5">
-                <p className="text-gray-500 dark:text-gray-400 mb-4">Select a password to copy:</p>
-                <ul className="space-y-4 mb-4">
-                  {passwords.map((password, index) => (
-                    <li key={index} className="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg dark:bg-gray-600 dark:border-gray-500">
-                      <div className="block">
-                        <div className="w-full text-lg font-semibold text-gray-500 dark:text-gray-400 ">Password {index + 1}</div>
-                        <div className="w-full  dark:text-white">{password.password}</div>
-                      </div>
-                      <FaCopy
-                        onClick={() => copyToClipboard(password.password)}
-                        className="w-4 h-4 cursor-pointer text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-white"
-                      />
-                    </li>
-                  ))}
-                </ul>
-                <button onClick={closeModal} className="text-white inline-flex w-full justify-center bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                  Close
+                {passwords.length == 0 ? (
+                  <p className="text-gray-500 dark:text-gray-400">No passwords saved.</p>
+
+                ) : (
+                  <ul className="space-y-4 mb-4">
+
+                    {passwords.map((password, index) => (
+                      <li key={index} className="flex items-center justify-between p-5 bg-white border border-gray-200 rounded-lg  dark:border-gray-500">
+                        <div className="block">
+                          <div className="w-full text-base font-medium text-gray-500 dark:text-gray-400 ">Password {index + 1}</div>
+                          <div className="w-full dark:text-black font-extrabold">{password.password}</div>
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <button onClick={() => copyToClipboard(password.password)} className="p-2 hover:bg-gray-300 rounded-lg  text-sky-700  hover:text-sky-700 dark:hover:text-sky-500" title="Copy Password"
+                          >
+                            <FaCopy className="h-4 w-4" />
+                          </button>
+                          <button onClick={() => handleEdit(password._id)} className="p-2 hover:bg-gray-300 rounded-lg  text-green-700 hover:text-green-500 dark:hover:text-green-500" title="Edit Password"
+                          >
+                            <FaEdit className="h-4 w-4" />
+                          </button>
+                          <button onClick={() => handleDelete(password._id)} className="p-2 hover:bg-gray-300 rounded-lg  text-red-700 hover:text-red-500 dark:hover:text-red-500" title="Delete Password"
+                          >
+                            <FaTrash className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )
+                }
+
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {isEditModalOpen && (
+        <div id="edit-password-modal" className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen px-4">
+            <div className="relative bg-white rounded-lg shadow dark:bg-gray-700 w-full max-w-md">
+              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Edit Password
+                </h3>
+                <button type="button" onClick={closeEditModal} className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm h-8 w-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                  <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                  </svg>
+                  <span className="sr-only">Close modal</span>
                 </button>
+              </div>
+              <div className="p-4 md:p-5">
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  saveEditedPassword(editingPassword);
+                }}>
+                  <div className="mb-4">
+                    <label htmlFor="edit-password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Password
+                    </label>
+                    <input
+                      type="text"
+                      id="edit-password"
+                      name="password"
+                      value={editingPassword.password}
+                      onChange={(e) => setEditingPassword({ ...editingPassword, password: e.target.value })}
+                      
+                      className="mt-1 block w-full px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white text-gray-800 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                    />
+                  </div>
+                  <div className="flex justify-end">
+                    <button type="button" onClick={closeEditModal} className="mr-4 py-2 px-4 border border-transparent text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500">
+                      Cancel
+                    </button>
+                    <button type="submit" className="py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500">
+                      Save
+                    </button>
+                  </div>
+                </form>
               </div>
             </div>
           </div>
@@ -140,5 +274,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-
-

@@ -8,13 +8,14 @@ export const UserRoutes = (dependencies) => {
   // ===============================================================================================
   // USER ROUTES
   // ===============================================================================================
-  const { registerController,loginController,savePasswordController ,getPasswordsController} = UserController(dependencies);
+  const { registerController,loginController,savePasswordController ,getPasswordsController,editPasswordsController,deletePasswordController} = UserController(dependencies);
   // router.post("/login", authController);
   router.post('/register',registerController)
   router.post('/login', loginController)
   router.post('/savePassword',savePasswordController)
   router.post('/getPasswords',getPasswordsController)
-  
+  router.put('/editPasswords', editPasswordsController)
+  router.post('/deletePassword',deletePasswordController)
 
   return router;
 };
